@@ -40,6 +40,7 @@ public unsafe class Avarice : IDalamudPlugin
     internal PositionalManager PositionalManager;
     internal uint[] PositionalStatus;
     internal RotationSolverWatcher RotationSolverWatcher;
+    internal WrathComboWatcher WrathComboWatcher;
 
     public Avarice(IDalamudPluginInterface pi)
     {
@@ -57,6 +58,7 @@ public unsafe class Avarice : IDalamudPlugin
             currentProfile = config.Profiles.FirstOr0(x => x.IsDefault);
             //Svc.GameNetwork.NetworkMessage += OnNetworkMessage;
             RotationSolverWatcher = new();
+            WrathComboWatcher = new();
             memory = new();
             windowSystem = new();
             configWindow = new();
@@ -222,6 +224,7 @@ public unsafe class Avarice : IDalamudPlugin
         memory.Dispose();
         ActionWatching.Dispose();
         ComboCache.ComboCacheInstance.Dispose();
+        WrathComboWatcher.Dispose();
         VisualFeedbackManager.Dispose();
         PctService.Dispose();
         PunishLibMain.Dispose();
@@ -231,6 +234,8 @@ public unsafe class Avarice : IDalamudPlugin
 
     private void Tick(object framework)
     {
+        WrathComboWatcher.Tick();
+
         if (Framework.Instance()->FrameCounter - PositionalStatus[0] > 1)
         {
             PositionalStatus[1] = 0;

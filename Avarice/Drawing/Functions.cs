@@ -3,6 +3,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.MathHelpers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using Avarice.Data;
 using Avarice.StaticData;
 using static Avarice.Drawing.DrawFunctions;
 using static Avarice.Util;
@@ -140,6 +141,19 @@ internal static unsafe class Functions
             ActorConeXZ(bnpc, bnpc.HitboxRadius + GetSkillRadius(), Maths.Radians(90 - 45), Maths.Radians(90 + 45), P.currentProfile.AnticipatedPieSettingsFlank);
             P.PositionalStatus[0] = Framework.Instance()->FrameCounter;
             P.PositionalStatus[1] = 2;
+        }
+
+        if (P.WrathComboWatcher.TryGetHintForTarget(bnpc, out var wrathDirection))
+        {
+            switch (wrathDirection)
+            {
+                case WrathComboPositionalDirection.Rear:
+                    DrawRear();
+                    return;
+                case WrathComboPositionalDirection.Flank:
+                    DrawSides();
+                    return;
+            }
         }
 
         if (P.currentProfile.UseRotationSolver && P.RotationSolverWatcher.Available && P.RotationSolverWatcher.TryGetNextGCDActionId(out var rsActionId)) 
