@@ -53,8 +53,10 @@ public unsafe class Avarice : IDalamudPlugin
             config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
             if (config.Profiles.Count == 0)
             {
-                config.Profiles.Add(new() { Name = "Default profile", IsDefault = true });
+                config.Profiles.Add(new() { Name = "Default", IsDefault = true });
             }
+            foreach (var pr in config.Profiles)
+                if (pr.IsDefault && pr.Name == "Default profile") pr.Name = "Default";
             currentProfile = config.Profiles.FirstOr0(x => x.IsDefault);
             //Svc.GameNetwork.NetworkMessage += OnNetworkMessage;
             RotationSolverWatcher = new();

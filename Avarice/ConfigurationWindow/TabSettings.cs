@@ -1,4 +1,4 @@
-﻿using Avarice.ConfigurationWindow.Player;
+using Avarice.ConfigurationWindow.Player;
 using Dalamud.Interface.Components;
 using static Avarice.ConfigurationWindow.ConfigWindow;
 
@@ -9,53 +9,79 @@ internal static class TabSettings
     // Sound effect names for the dropdown (SE1-SE16)
     private static readonly string[] SoundNames = new[]
     {
-        "<se.1>",
-        "<se.2>",
-        "<se.3>",
-        "<se.4>",
-        "<se.5>",
-        "<se.6>",
-        "<se.7>",
-        "<se.8>",
-        "<se.9>",
-        "<se.10>",
-        "<se.11>",
-        "<se.12>",
-        "<se.13>",
-        "<se.14>",
-        "<se.15>",
-        "<se.16>"
+        "<se.1>", "<se.2>", "<se.3>", "<se.4>", "<se.5>", "<se.6>", "<se.7>", "<se.8>",
+        "<se.9>", "<se.10>", "<se.11>", "<se.12>", "<se.13>", "<se.14>", "<se.15>", "<se.16>"
     };
 
-    /*internal static Dictionary<ClassDisplayCondition, string> ClassDisplayConditionNames = new()
+    internal static void DrawOverlays()
     {
-        { ClassDisplayCondition.Do_not_display, "Never" },
-        { ClassDisplayCondition.Display_on_positional_jobs, "Melee DPS Only" },
-        { ClassDisplayCondition.Display_on_all_jobs, "DoW/DoM/DoH/DoL" },
-    };*/
+        BoxDrawing.ContentsAction();
 
-    static InfoBox BoxGeneral = new()
+        SectionHeader("Target");
+        BoxAnticipation.ContentsAction();
+        ImGui.Separator();
+        BoxCurrentSegment.ContentsAction();
+        ImGui.Separator();
+        BoxFront.ContentsAction();
+        ImGui.Separator();
+        BoxMeleeRing.ContentsAction();
+        ImGui.Separator();
+        BoxHitboxSettings.ContentsAction();
+
+        SectionHeader("Player");
+        BoxPlayerDot.ContentsAction();
+        ImGui.Separator();
+        BoxPlayerHitbox.ContentsAction();
+        ImGui.Separator();
+        BoxPlayerDotOthers.ContentsAction();
+
+        SectionHeader("World");
+        BoxCompass.Draw();
+        TabTank.Draw();
+    }
+
+    internal static void DrawFeedback()
     {
+        ImGuiHelpers.ScaledDummy(2f);
+        BoxFeedback.ContentsAction();
+    }
+
+    internal static void DrawAdvanced()
+    {
+        ImGuiHelpers.ScaledDummy(2f);
+        BoxRendering.ContentsAction();
+        if (Svc.PluginInterface.TryGetData<bool[]>("Splatoon.IsInUnsafeZone", out _))
+        {
+            SectionHeader("Splatoon");
+            BoxSplatoon.ContentsAction();
+        }
+    }
+
+    private static void SectionHeader(string label)
+    {
+        ImGui.Spacing();
+        ImGui.SetWindowFontScale(0.82f);
+        ImGuiEx.Text(new Vector4(0.96f, 0.62f, 0.44f, 1f), label.ToUpperInvariant());
+        ImGui.SetWindowFontScale(1f);
+        ImGui.Separator();
+        ImGui.Spacing();
+    }
+
+    static InfoBox BoxDrawing = new()
+    {
+        Label = "Drawing",
         ContentsAction = delegate
         {
-            // Drawing controls section
-            ImGui.Text("Drawing Controls:");
-
-            // Profile-specific drawing toggle with styled command hint
-            ImGui.Checkbox("Enable Drawing", ref P.currentProfile.DrawingEnabled);
+            ImGui.Checkbox("Enable drawing", ref P.currentProfile.DrawingEnabled);
             ImGui.SameLine();
-            // Add a little spacing
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 5);
-            // Show command in a softer color as a shortcut hint
             ImGuiEx.Text(new Vector4(0.7f, 0.7f, 1.0f, 1.0f), "(/avarice draw)");
             ImGuiComponents.HelpMarker("Toggle all overlay drawing features. Can also be toggled with /avarice draw command");
 
-            // New option to only draw for positional targets
             bool prevOnlyPositional = P.config.OnlyDrawIfPositional;
             if (ImGui.Checkbox("Only show for positional targets", ref P.config.OnlyDrawIfPositional) && prevOnlyPositional != P.config.OnlyDrawIfPositional)
             {
-                // Save change to config
-                Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                Svc.PluginInterface.SavePluginConfig(P.config);
             }
             ImGuiComponents.HelpMarker("When enabled, overlays will only be shown when targeting an enemy that requires positional attacks");
 
@@ -68,20 +94,20 @@ internal static class TabSettings
                 ImGuiComponents.HelpMarker("When enabled, the Enemy Distance Indicator and positional ring without positional checks when the target has non-positional buffs");
                 ImGui.Unindent();
             }
+        }
+    };
 
-            ImGui.Separator();
-
-            ImGui.Text("Positional Feedback:");
-
-            if (P.config.VisualFeedbackSettings == null)
-                P.config.VisualFeedbackSettings = new VisualFeedbackSettings();
-            if (P.config.AudioFeedbackSettings == null)
-                P.config.AudioFeedbackSettings = new AudioFeedbackSettings();
+    static InfoBox BoxFeedback = new()
+    {
+        Label = "Positional feedback",
+        ContentsAction = delegate
+        {
+            P.config.VisualFeedbackSettings ??= new VisualFeedbackSettings();
+            P.config.AudioFeedbackSettings ??= new AudioFeedbackSettings();
 
             var visualSettings = P.config.VisualFeedbackSettings;
             var audioSettings = P.config.AudioFeedbackSettings;
 
-            // Visual Mode selector
             ImGui.AlignTextToFramePadding();
             ImGui.Text("Visual Mode:");
             ImGui.SameLine();
@@ -91,10 +117,9 @@ internal static class TabSettings
             if (ImGui.Combo("##visualMode", ref currentMode, modeNames, modeNames.Length))
             {
                 visualSettings.Mode = (VisualFeedbackMode)currentMode;
-                Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                Svc.PluginInterface.SavePluginConfig(P.config);
             }
 
-            // Show warning/info based on mode
             if (visualSettings.Mode == VisualFeedbackMode.GameVfx)
             {
                 if (!VfxEditorManager.IsVfxEditorAvailable())
@@ -109,7 +134,7 @@ internal static class TabSettings
                 ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "Game VFX includes built-in sounds");
             }
 
-            ImGui.Text("On Hit:");
+            SectionHeader("On hit");
             ImGui.Indent();
 
             ImGui.Checkbox("Visual##hit", ref P.currentProfile.EnableVFXSuccess);
@@ -120,11 +145,10 @@ internal static class TabSettings
                 if (ImGui.ColorEdit4("##hitColor", ref successColor, ImGuiColorEditFlags.NoInputs))
                 {
                     visualSettings.SuccessColor = successColor;
-                    Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                    Svc.PluginInterface.SavePluginConfig(P.config);
                 }
             }
 
-            // Only show audio options for Vector mode
             if (visualSettings.Mode == VisualFeedbackMode.Vector)
             {
                 ImGui.Checkbox("Audio##hit", ref P.currentProfile.EnableAudioSuccess);
@@ -137,7 +161,7 @@ internal static class TabSettings
                     if (ImGui.Combo("##hitSound", ref successIndex, SoundNames, 16))
                     {
                         audioSettings.SuccessSoundId = (uint)(successIndex + 1);
-                        Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                        Svc.PluginInterface.SavePluginConfig(P.config);
                     }
                 }
             }
@@ -150,7 +174,7 @@ internal static class TabSettings
 
             ImGui.Unindent();
 
-            ImGui.Text("On Miss:");
+            SectionHeader("On miss");
             ImGui.Indent();
 
             ImGui.Checkbox("Visual##miss", ref P.currentProfile.EnableVFXFailure);
@@ -161,11 +185,10 @@ internal static class TabSettings
                 if (ImGui.ColorEdit4("##missColor", ref failureColor, ImGuiColorEditFlags.NoInputs))
                 {
                     visualSettings.FailureColor = failureColor;
-                    Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                    Svc.PluginInterface.SavePluginConfig(P.config);
                 }
             }
 
-            // Only show audio options for Vector mode
             if (visualSettings.Mode == VisualFeedbackMode.Vector)
             {
                 ImGui.Checkbox("Audio##miss", ref P.currentProfile.EnableAudioFailure);
@@ -178,7 +201,7 @@ internal static class TabSettings
                     if (ImGui.Combo("##missSound", ref failureIndex, SoundNames, 16))
                     {
                         audioSettings.FailureSoundId = (uint)(failureIndex + 1);
-                        Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                        Svc.PluginInterface.SavePluginConfig(P.config);
                     }
                 }
             }
@@ -191,7 +214,6 @@ internal static class TabSettings
 
             ImGui.Unindent();
 
-            // Icon size only applies to Vector mode
             if (visualSettings.Mode == VisualFeedbackMode.Vector && (P.currentProfile.EnableVFXSuccess || P.currentProfile.EnableVFXFailure))
             {
                 ImGui.SetNextItemWidth(150f);
@@ -199,27 +221,28 @@ internal static class TabSettings
                 if (ImGui.SliderFloat("Icon Size", ref iconSize, 5f, 100f))
                 {
                     visualSettings.IconSize = iconSize;
-                    Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                    Svc.PluginInterface.SavePluginConfig(P.config);
                 }
             }
 
-            ImGui.Separator();
-
-            ImGui.Text("Chat Messages:");
+            SectionHeader("Chat");
             ImGui.Checkbox("Print on miss", ref P.currentProfile.EnableChatMessagesFailure);
             ImGui.SameLine();
             ImGui.Checkbox("Print on hit", ref P.currentProfile.EnableChatMessagesSuccess);
             ImGui.Checkbox("Encounter summary on combat end", ref P.currentProfile.Announce);
+        }
+    };
 
-            ImGui.Separator();
-
-            // Rendering Settings
-            ImGui.Text("Rendering Settings:");
+    static InfoBox BoxRendering = new()
+    {
+        Label = "Rendering",
+        ContentsAction = delegate
+        {
             ImGuiEx.Text(new Vector4(1.0f, 0.8f, 0.0f, 1.0f), "Warning: Pictomancy may have issues on Mac/Linux.");
 
             if (ImGui.Checkbox("Render under UI (Pictomancy)", ref P.config.UsePictomancyRenderer))
             {
-                Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                Svc.PluginInterface.SavePluginConfig(P.config);
             }
             ImGuiComponents.HelpMarker("When enabled, overlays will render underneath the game's native UI elements (action bars, job gauges, etc.) instead of on top.");
 
@@ -229,7 +252,7 @@ internal static class TabSettings
 
                 if (ImGui.Checkbox("Clip around native UI", ref P.config.PictomancyClipNativeUI))
                 {
-                    Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                    Svc.PluginInterface.SavePluginConfig(P.config);
                 }
                 ImGuiComponents.HelpMarker("Automatically clips rendering around native UI elements.");
 
@@ -238,14 +261,19 @@ internal static class TabSettings
                 if (ImGui.SliderInt("Max Opacity", ref maxAlpha, 0, 255))
                 {
                     P.config.PictomancyMaxAlpha = (byte)maxAlpha;
-                    Safe(() => Svc.PluginInterface.SavePluginConfig(P.config));
+                    Svc.PluginInterface.SavePluginConfig(P.config);
                 }
                 ImGuiComponents.HelpMarker("Maximum opacity for all rendered overlays (0-255).");
 
                 ImGui.Unindent();
             }
-        },
-        Label = "General settings"
+        }
+    };
+
+    static InfoBox BoxSplatoon = new()
+    {
+        Label = "Splatoon",
+        ContentsAction = TabSplatoon.Draw
     };
 
     static InfoBox BoxCurrentSegment = new()
@@ -253,9 +281,8 @@ internal static class TabSettings
         Label = "Current Slice Highlight Settings",
         ContentsAction = delegate
         {
-            //ImGui.SetNextItemWidth(SelectWidth);
             ImGui.Checkbox("Current Slice Highlight Settings", ref P.currentProfile.EnableCurrentPie);
-            //if (P.currentProfile.EnableCurrentPie)
+            if (P.currentProfile.EnableCurrentPie)
             {
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
@@ -281,7 +308,7 @@ internal static class TabSettings
         {
             ImGui.SetNextItemWidth(200f);
             ImGui.Checkbox("Front Slice Indicator", ref P.currentProfile.EnableFrontSegment);
-            //if (P.currentProfile.EnableFrontSegment)
+            if (P.currentProfile.EnableFrontSegment)
             {
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
@@ -302,7 +329,7 @@ internal static class TabSettings
         {
             ImGui.SetNextItemWidth(SelectWidth);
             ImGui.Checkbox("Enemy Distance Indicator", ref P.currentProfile.EnableMaxMeleeRing);
-            //if (P.currentProfile.EnableMaxMeleeRing)
+            if (P.currentProfile.EnableMaxMeleeRing)
             {
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
@@ -328,12 +355,12 @@ internal static class TabSettings
 
     static InfoBox BoxAnticipation = new()
     {
-        Label = "Positional Anticipation Settings",
+        Label = "Positional Anticipation",
         ContentsAction = delegate
         {
             ImGui.SetNextItemWidth(SelectWidth);
-            ImGui.Checkbox("Positional Anticipation Settings", ref P.currentProfile.EnableAnticipatedPie);
-            //if(P.currentProfile.EnableAnticipatedPie)
+            ImGui.Checkbox("Enable anticipation pie", ref P.currentProfile.EnableAnticipatedPie);
+            if (P.currentProfile.EnableAnticipatedPie)
             {
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
@@ -346,10 +373,33 @@ internal static class TabSettings
                 ImGuiEx.InvisibleButton(3);
                 ImGui.SameLine();
                 ImGui.Checkbox("Disable on True North", ref P.currentProfile.AnticipatedDisableTrueNorth);
+
+                var job = Svc.ClientState.LocalPlayer?.ClassJob.RowId ?? 0u;
+                if (job == 30)
+                {
+                    ImGui.Checkbox("Show rear when Trick Attack is off cooldown", ref P.currentProfile.TrickAttack);
+                    ImGui.Checkbox("Show both valid positionals based on Kazematoi charges", ref P.currentProfile.Kazematoi);
+                }
+                else if (job == 34)
+                {
+                    ImGui.Checkbox("Disable anticipation while under Meikyo Shisui", ref P.currentProfile.Meikyo);
+                }
+                else if (job == 39)
+                {
+                    ImGuiEx.Text("Anticipate first:");
+                    ImGui.SameLine();
+                    ImGui.RadioButton("Rear", ref P.currentProfile.Reaper, 0);
+                    ImGui.SameLine();
+                    ImGui.RadioButton("Flank", ref P.currentProfile.Reaper, 1);
+                }
+
+                if (P.currentProfile.UseRotationSolver || P.RotationSolverWatcher.Available)
+                {
+                    ImGui.Checkbox("Use Rotation Solver to anticipate positionals", ref P.currentProfile.UseRotationSolver);
+                }
             }
         }
     };
-
 
     static InfoBox BoxHitboxSettings = new()
     {
@@ -374,12 +424,11 @@ internal static class TabSettings
         Label = "Player Damage Pixel",
         ContentsAction = delegate
         {
-            ImGuiEx.TextWrapped("Displays the player's damage hitbox, which in reality is a small pixel between your feet. " +
-                "Whilst you can customize the size of this feature with the \"Thickness\" " +
-                "parameter, it's recommended to leave it at the default value.");
             ImGui.SetNextItemWidth(SelectWidth);
             ImGui.Checkbox("Player Damage Pixel", ref P.currentProfile.EnablePlayerDot);
-            //if (P.currentProfile.EnablePlayerDot)
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker("Displays the player's damage hitbox — a small pixel between your feet. Customizable via Thickness, but the default is recommended.");
+            if (P.currentProfile.EnablePlayerDot)
             {
                 DrawUnfilledSettings("dot", ref P.currentProfile.PlayerDotSettings);
             }
@@ -409,40 +458,14 @@ internal static class TabSettings
         Label = "Player Reach Outline",
         ContentsAction = delegate
         {
-            ImGuiEx.TextWrapped("Displays a ring around the player character, allowing you to see the reach of auto attacks.");
             ImGui.SetNextItemWidth(SelectWidth);
             ImGui.Checkbox("Player Reach Outline", ref P.currentProfile.EnablePlayerRing);
-            //if (P.currentProfile.EnablePlayerRing)
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker("Displays a ring around you showing the reach of auto attacks.");
+            if (P.currentProfile.EnablePlayerRing)
             {
                 DrawUnfilledSettings("hitbox", ref P.currentProfile.PlayerRingSettings);
             }
         }
     };
-
-    internal static void Draw()
-    {
-        ImGuiEx.EzTabBar("settingsbar2",
-            ("Player", delegate
-            {
-                ImGuiHelpers.ScaledDummy(5f);
-                BoxGeneral.DrawStretched();
-                BoxPlayerDot.DrawStretched();
-                BoxCompass.Draw();
-                BoxPlayerHitbox.DrawStretched();
-                BoxPlayerDotOthers.DrawStretched();
-                //ImGui.Checkbox("Debug Mode", ref P.currentProfile.Debug);
-                //ImGuiComponents.HelpMarker("Displays the debug menu tab, for development purposes.");
-            }, null, true),
-            ("Target", delegate
-            {
-                ImGuiHelpers.ScaledDummy(5f);
-                BoxCurrentSegment.DrawStretched();
-                BoxFront.DrawStretched();
-                BoxMeleeRing.DrawStretched();
-                BoxHitboxSettings.DrawStretched();
-            }, null, true),
-            ("Duty Centralisation", TabTank.Draw, null, true),
-            (Svc.PluginInterface.TryGetData<bool[]>("Splatoon.IsInUnsafeZone", out _) ? "Splatoon" : null, TabSplatoon.Draw, null, true)
-        );
-    }
 }
