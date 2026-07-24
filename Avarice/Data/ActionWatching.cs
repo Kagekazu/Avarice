@@ -42,7 +42,7 @@ namespace Avarice.Data
 			ReceiveActionEffectHook!.Original(sourceId, sourceCharacter, pos, effectHeader, effectArray, effectTail);
 			ActionEffectHeader header = Marshal.PtrToStructure<ActionEffectHeader>((nint)effectHeader);
 
-			if (ActionType is 13 or 2)
+			if (effectHeader->ActionType != FFXIVClientStructs.FFXIV.Client.Game.ActionType.Action)
 			{
 				return;
 			}
