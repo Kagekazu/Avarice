@@ -122,15 +122,6 @@ internal static class TabSettings
 
             if (visualSettings.Mode == VisualFeedbackMode.GameVfx)
             {
-                if (!VfxEditorManager.IsVfxEditorAvailable())
-                {
-                    ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1f), "VFXEditor plugin not detected!");
-                    ImGuiComponents.HelpMarker("Game VFX mode requires the VFXEditor plugin to be installed. Install it from the Dalamud plugin installer.");
-                }
-                else
-                {
-                    ImGui.TextColored(new Vector4(0.4f, 1f, 0.4f, 1f), "VFXEditor detected");
-                }
                 ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "Game VFX includes built-in sounds");
             }
 
