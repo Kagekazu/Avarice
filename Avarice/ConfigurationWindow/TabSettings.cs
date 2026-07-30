@@ -356,33 +356,26 @@ internal static class TabSettings
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
                 ImGuiEx.EnumCombo($"##adt", ref P.currentProfile.AnticipatedPieSettings.DisplayCondition);
-                ImGuiEx.InvisibleButton(3);
-                ImGui.SameLine();
-                ImGuiEx.Text("Color:");
-                ImGui.SameLine();
-                ImGui.ColorEdit4($"##ca3", ref P.currentProfile.AnticipatedPieSettings.Fill, ImGuiColorEditFlags.NoInputs);
+                ImGuiEx.TextV("Rear:");
+                DrawUnfilledSettings("antr", ref P.currentProfile.AnticipatedPieSettings, false);
+                ImGuiEx.TextV("Flank:");
+                DrawUnfilledSettings("antf", ref P.currentProfile.AnticipatedPieSettingsFlank, false);
                 ImGuiEx.InvisibleButton(3);
                 ImGui.SameLine();
                 ImGui.Checkbox("Disable on True North", ref P.currentProfile.AnticipatedDisableTrueNorth);
 
-                var job = Svc.ClientState.LocalPlayer?.ClassJob.RowId ?? 0u;
-                if (job == 30)
-                {
-                    ImGui.Checkbox("Show rear when Trick Attack is off cooldown", ref P.currentProfile.TrickAttack);
-                    ImGui.Checkbox("Show both valid positionals based on Kazematoi charges", ref P.currentProfile.Kazematoi);
-                }
-                else if (job == 34)
-                {
-                    ImGui.Checkbox("Disable anticipation while under Meikyo Shisui", ref P.currentProfile.Meikyo);
-                }
-                else if (job == 39)
-                {
-                    ImGuiEx.Text("Anticipate first:");
-                    ImGui.SameLine();
-                    ImGui.RadioButton("Rear", ref P.currentProfile.Reaper, 0);
-                    ImGui.SameLine();
-                    ImGui.RadioButton("Flank", ref P.currentProfile.Reaper, 1);
-                }
+                ImGuiEx.TextV("Ninja:");
+                ImGui.Checkbox("Show rear when Trick Attack is off cooldown", ref P.currentProfile.TrickAttack);
+                ImGui.Checkbox("Show both valid positionals based on Kazematoi charges", ref P.currentProfile.Kazematoi);
+                ImGuiEx.TextV("Samurai:");
+                ImGui.Checkbox("Disable anticipation while under Meikyo Shisui", ref P.currentProfile.Meikyo);
+                ImGuiEx.TextV("Reaper:");
+                ImGui.SameLine();
+                ImGuiEx.Text("Anticipate first:");
+                ImGui.SameLine();
+                ImGui.RadioButton("Rear", ref P.currentProfile.Reaper, 0);
+                ImGui.SameLine();
+                ImGui.RadioButton("Flank", ref P.currentProfile.Reaper, 1);
 
                 if (P.currentProfile.UseRotationSolver || P.RotationSolverWatcher.Available)
                 {
