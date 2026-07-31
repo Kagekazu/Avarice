@@ -142,7 +142,7 @@ internal static unsafe class Functions
             P.PositionalStatus[1] = 2;
         }
 
-        if (P.currentProfile.UseRotationSolver && P.RotationSolverWatcher.Available) 
+        if (P.currentProfile.UseRotationSolver && P.RotationSolverWatcher.IPCAvailable) 
         {
             switch (P.RotationSolverWatcher.DesiredPositional) 
             {

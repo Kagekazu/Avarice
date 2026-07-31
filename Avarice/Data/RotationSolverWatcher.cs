@@ -30,11 +30,28 @@ internal class RotationSolverWatcher : IDisposable
         DesiredPositional = PollDesiredPositional(out var pollSucceeded);
 		if (pollSucceeded)
 		{
-			Available = true;
+			IPCAvailable = true;
 		}
 	}
 
-    public void Dispose()
+	public bool IsRSREnabled()
+	{
+		try
+		{
+			const string rsrName = "Rotation Solver Reborn";
+			foreach (var p in Svc.PluginInterface.InstalledPlugins)
+			{
+				if ((p.Name.Equals(rsrName, StringComparison.OrdinalIgnoreCase) || p.InternalName.Equals(rsrName, StringComparison.OrdinalIgnoreCase)) && p.IsLoaded)
+				{
+					return true;
+				}
+			}
+		}
+		catch { }
+		return false;
+	}
+
+	public void Dispose()
     {
         try
         {
@@ -46,7 +63,7 @@ internal class RotationSolverWatcher : IDisposable
         }
     }
 
-    public bool Available { get; private set; }
+    public bool IPCAvailable { get; private set; }
     private readonly Stopwatch DataAge = new();
     private uint _nextGcdActionId;
     public uint NextGCDActionId 
@@ -54,7 +71,7 @@ internal class RotationSolverWatcher : IDisposable
         get => DataAge.ElapsedMilliseconds < 5000 ? _nextGcdActionId : 0;
         private set 
         {
-            Available = true;
+			IPCAvailable = true;
             Svc.Log.Debug($"Next GCD Action: {value}");
             DataAge.Restart();
             _nextGcdActionId = value;
@@ -81,7 +98,7 @@ internal class RotationSolverWatcher : IDisposable
 
     private void OnDesiredPositionalChanged(byte value)
     {
-        Available = true;
+		IPCAvailable = true;
         DesiredPositional = MapPositional(value);
     }
 
