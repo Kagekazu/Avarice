@@ -226,6 +226,7 @@ public unsafe class Avarice : IDalamudPlugin
         ComboCache.ComboCacheInstance.Dispose();
         VisualFeedbackManager.Dispose();
         PctService.Dispose();
+        RotationSolverWatcher.Dispose();
         PunishLibMain.Dispose();
         ECommonsMain.Dispose();
         P = null;

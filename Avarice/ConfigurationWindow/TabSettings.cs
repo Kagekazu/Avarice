@@ -377,9 +377,9 @@ internal static class TabSettings
                 ImGui.SameLine();
                 ImGui.RadioButton("Flank", ref P.currentProfile.Reaper, 1);
 
-                if (P.currentProfile.UseRotationSolver || P.RotationSolverWatcher.Available)
+                if (P.currentProfile.UseRotationSolver || Data.RotationSolverWatcher.IsRSREnabled())
                 {
-                    ImGui.Checkbox("Use Rotation Solver to anticipate positionals", ref P.currentProfile.UseRotationSolver);
+                    ImGui.Checkbox("Use Rotation Solver Reborn to anticipate positionals", ref P.currentProfile.UseRotationSolver);
                 }
             }
         }
