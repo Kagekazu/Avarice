@@ -156,10 +156,9 @@ internal static unsafe class Functions
             }
         }
 
-        if (P.currentProfile.UseRotationSolver && P.RotationSolverWatcher.Available && P.RotationSolverWatcher.TryGetNextGCDActionId(out var rsActionId)) 
+        if (P.currentProfile.UseRotationSolver && P.RotationSolverWatcher.IPCAvailable)
         {
-            if (!StaticData.Data.ActionPositional.TryGetValue(rsActionId, out var positional)) return;
-            switch (positional) 
+            switch (P.RotationSolverWatcher.DesiredPositional)
             {
                 case EnemyPositional.Flank:
                     DrawSides();

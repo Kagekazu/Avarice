@@ -122,15 +122,6 @@ internal static class TabSettings
 
             if (visualSettings.Mode == VisualFeedbackMode.GameVfx)
             {
-                if (!VfxEditorManager.IsVfxEditorAvailable())
-                {
-                    ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1f), "VFXEditor plugin not detected!");
-                    ImGuiComponents.HelpMarker("Game VFX mode requires the VFXEditor plugin to be installed. Install it from the Dalamud plugin installer.");
-                }
-                else
-                {
-                    ImGui.TextColored(new Vector4(0.4f, 1f, 0.4f, 1f), "VFXEditor detected");
-                }
                 ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "Game VFX includes built-in sounds");
             }
 
@@ -365,37 +356,30 @@ internal static class TabSettings
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
                 ImGuiEx.EnumCombo($"##adt", ref P.currentProfile.AnticipatedPieSettings.DisplayCondition);
-                ImGuiEx.InvisibleButton(3);
-                ImGui.SameLine();
-                ImGuiEx.Text("Color:");
-                ImGui.SameLine();
-                ImGui.ColorEdit4($"##ca3", ref P.currentProfile.AnticipatedPieSettings.Fill, ImGuiColorEditFlags.NoInputs);
+                ImGuiEx.TextV("Rear:");
+                DrawUnfilledSettings("antr", ref P.currentProfile.AnticipatedPieSettings, false);
+                ImGuiEx.TextV("Flank:");
+                DrawUnfilledSettings("antf", ref P.currentProfile.AnticipatedPieSettingsFlank, false);
                 ImGuiEx.InvisibleButton(3);
                 ImGui.SameLine();
                 ImGui.Checkbox("Disable on True North", ref P.currentProfile.AnticipatedDisableTrueNorth);
 
-                var job = Svc.ClientState.LocalPlayer?.ClassJob.RowId ?? 0u;
-                if (job == 30)
-                {
-                    ImGui.Checkbox("Show rear when Trick Attack is off cooldown", ref P.currentProfile.TrickAttack);
-                    ImGui.Checkbox("Show both valid positionals based on Kazematoi charges", ref P.currentProfile.Kazematoi);
-                }
-                else if (job == 34)
-                {
-                    ImGui.Checkbox("Disable anticipation while under Meikyo Shisui", ref P.currentProfile.Meikyo);
-                }
-                else if (job == 39)
-                {
-                    ImGuiEx.Text("Anticipate first:");
-                    ImGui.SameLine();
-                    ImGui.RadioButton("Rear", ref P.currentProfile.Reaper, 0);
-                    ImGui.SameLine();
-                    ImGui.RadioButton("Flank", ref P.currentProfile.Reaper, 1);
-                }
+                ImGuiEx.TextV("Ninja:");
+                ImGui.Checkbox("Show rear when Trick Attack is off cooldown", ref P.currentProfile.TrickAttack);
+                ImGui.Checkbox("Show both valid positionals based on Kazematoi charges", ref P.currentProfile.Kazematoi);
+                ImGuiEx.TextV("Samurai:");
+                ImGui.Checkbox("Disable anticipation while under Meikyo Shisui", ref P.currentProfile.Meikyo);
+                ImGuiEx.TextV("Reaper:");
+                ImGui.SameLine();
+                ImGuiEx.Text("Anticipate first:");
+                ImGui.SameLine();
+                ImGui.RadioButton("Rear", ref P.currentProfile.Reaper, 0);
+                ImGui.SameLine();
+                ImGui.RadioButton("Flank", ref P.currentProfile.Reaper, 1);
 
-                if (P.currentProfile.UseRotationSolver || P.RotationSolverWatcher.Available)
+                if (P.currentProfile.UseRotationSolver || Data.RotationSolverWatcher.IsRSREnabled())
                 {
-                    ImGui.Checkbox("Use Rotation Solver to anticipate positionals", ref P.currentProfile.UseRotationSolver);
+                    ImGui.Checkbox("Use Rotation Solver Reborn to anticipate positionals", ref P.currentProfile.UseRotationSolver);
                 }
             }
         }

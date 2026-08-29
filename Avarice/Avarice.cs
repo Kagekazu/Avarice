@@ -229,6 +229,7 @@ public unsafe class Avarice : IDalamudPlugin
         WrathComboWatcher.Dispose();
         VisualFeedbackManager.Dispose();
         PctService.Dispose();
+        RotationSolverWatcher.Dispose();
         PunishLibMain.Dispose();
         ECommonsMain.Dispose();
         P = null;

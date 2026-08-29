@@ -60,7 +60,7 @@ internal static class PositionalFeedbackManager
         switch (mode)
         {
             case VisualFeedbackMode.GameVfx:
-                VfxEditorManager.DisplayVfx(success);
+                LockonManager.DisplayIcon(success);
                 break;
             case VisualFeedbackMode.Vector:
             default:

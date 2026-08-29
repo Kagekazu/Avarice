@@ -1,40 +1,56 @@
-﻿using System.Diagnostics;
-using Avarice.StaticData;
+﻿using Avarice.StaticData;
 using ECommons.EzIpcManager;
 
 namespace Avarice.Data;
 
-internal class RotationSolverWatcher 
+internal class RotationSolverWatcher : IDisposable
 {
-    public RotationSolverWatcher() 
-    {
-        EzIPC.Init(this);
-    }
+	public RotationSolverWatcher() 
+	{
+		EzIPC.Init(this);
+	}
 
-    public bool Available { get; private set; }
-    private readonly Stopwatch DataAge = new();
-    private uint _nextGcdActionId;
-    public uint NextGCDActionId 
-    {
-        get => DataAge.ElapsedMilliseconds < 5000 ? _nextGcdActionId : 0;
-        private set 
-        {
-            Available = true;
-            Svc.Log.Debug($"Next GCD Action: {value}");
-            DataAge.Restart();
-            _nextGcdActionId = value;
-        }
-    }
+	public static bool IsRSREnabled()
+	{
+		try
+		{
+			const string rsrName = "Rotation Solver Reborn";
+			foreach (var p in Svc.PluginInterface.InstalledPlugins)
+			{
+				if ((p.Name.Equals(rsrName, StringComparison.OrdinalIgnoreCase) || p.InternalName.Equals(rsrName, StringComparison.OrdinalIgnoreCase)) && p.IsLoaded)
+				{
+					return true;
+				}
+			}
+		}
+		catch { }
+		return false;
+	}
 
-    [EzIPCEvent("RotationSolverReborn.ActionUpdater.NextActionChanged", false)]
-    public void NextGCDActionChanged(uint action) 
-    {
-        NextGCDActionId = action;
-    }
+	public void Dispose()
+	{
+	}
 
-    public bool TryGetNextGCDActionId(out ActionID o) 
+    public bool IPCAvailable { get; private set; }
+
+    /// <summary>
+    /// RSR's currently desired positional for its next GCD action.
+    /// Falls back to None if RSR is not installed/loaded.
+    /// </summary>
+    public EnemyPositional DesiredPositional { get; private set; } = EnemyPositional.None;
+
+	[EzIPCEvent("RotationSolverReborn.ActionUpdater.DesiredPositionalChanged", false)]
+	public void OnDesiredPositionalChanged(byte value)
+	{
+		IPCAvailable = true;
+		DesiredPositional = MapPositional(value);
+	}
+
+	private static EnemyPositional MapPositional(byte value) => value switch
     {
-        o = (ActionID) NextGCDActionId;
-        return o != 0;
-    }
+        1 => EnemyPositional.Rear,
+        2 => EnemyPositional.Flank,
+        3 => EnemyPositional.Front,
+        _ => EnemyPositional.None,
+    };
 }
