@@ -3,9 +3,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.MathHelpers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using Avarice.Data;
 using Avarice.Positional;
-using Avarice.StaticData;
 using static Avarice.Drawing.DrawFunctions;
 using static Avarice.Util;
 

@@ -108,7 +108,6 @@ public class Avarice : IAsyncDalamudPlugin
         if (config.SplatoonUnsafePixel)
             TabSplatoon.WriteRequest();
 
-        ActionWatching.Enable();
         ComboCache.ComboCacheInstance = new ComboCache();
         PositionalManager = new();
         PctService.Initialize(Svc.PluginInterface);
@@ -239,7 +238,6 @@ public class Avarice : IAsyncDalamudPlugin
                 Svc.PluginInterface.GetIpcProvider<IntPtr, CardinalDirection>("Avarice.CardinalDirection").UnregisterFunc();
             });
             memory?.Dispose();
-            ActionWatching.Dispose();
             ComboCache.ComboCacheInstance?.Dispose();
             WrathComboWatcher?.Dispose();
             VisualFeedbackManager.Dispose();

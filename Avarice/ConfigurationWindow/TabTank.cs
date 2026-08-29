@@ -23,13 +23,15 @@ namespace Avarice.ConfigurationWindow
                 "A dot at the configured centre of the duty arena. This is per-profile.");
             if (P.currentProfile.EnableTankMiddle || P.currentProfile.EnableDutyMiddle)
             {
-                ImGui.ColorEdit4("Duty Centre Pixel Colour", ref P.config.DutyMidPixelCol, ImGuiColorEditFlags.NoInputs);
+                ImGui.ColorEdit4("Duty centre colour", ref P.config.DutyMidPixelCol, ImGuiColorEditFlags.NoInputs);
                 ImGui.SetNextItemWidth(100f);
-                ImGui.SliderFloat("Duty Centre Radius", ref P.config.DutyMidRadius, 0.5f, 5f);
-                ImGui.ColorEdit4("Centred Pixel Colour", ref P.config.CenteredPixelColor, ImGuiColorEditFlags.NoInputs);
-                ImGui.ColorEdit4("Uncentred Pixel Colour", ref P.config.UncenteredPixelColor, ImGuiColorEditFlags.NoInputs);
+                ImGui.SliderFloat("On-centre distance", ref P.config.DutyMidRadius, 0.5f, 5f);
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker("Lower means the boss must sit closer to the arena centre to use the on-centre colour.");
+                ImGui.ColorEdit4("On-centre colour", ref P.config.CenteredPixelColor, ImGuiColorEditFlags.NoInputs);
+                ImGui.ColorEdit4("Off-centre colour", ref P.config.UncenteredPixelColor, ImGuiColorEditFlags.NoInputs);
                 ImGui.SetNextItemWidth(100f);
-                ImGui.SliderFloat("Tank Pixel Size", ref P.config.CenterPixelThickness, 0.5f, 5f);
+                ImGui.SliderFloat("Pixel size", ref P.config.CenterPixelThickness, 0.5f, 5f);
             }
 
             Ui.SectionLabel("Duty centre overrides");

@@ -15,7 +15,7 @@ public class Profile
     public bool EnableAudioFailure = false;
     public bool Announce = false;
     public bool Debug = false;
-    public bool DrawingEnabled = true; // New property for drawing toggle
+    public bool DrawingEnabled = true;
     public float MeleeSkillAtk = 3f;
     public bool MeleeSkillIncludeHitbox = true;
     public float MeleeAutoAtk = 2.1f;

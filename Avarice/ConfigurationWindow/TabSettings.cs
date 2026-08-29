@@ -99,12 +99,16 @@ internal static class TabSettings
                 if (wrath)
                 {
                     Ui.CheckboxHelp("Use Wrath Combo for the next positional", ref P.currentProfile.UseWrathCombo,
-                        "Uses Wrath Combo's next positional when it has one. Otherwise Avarice uses your combo.");
+                        rsr
+                            ? "Uses Wrath Combo when it has a next positional. Otherwise Rotation Solver or your combo."
+                            : "Uses Wrath Combo when it has a next positional. Otherwise your combo.");
                 }
                 if (rsr)
                 {
                     Ui.CheckboxHelp("Use Rotation Solver for the next positional", ref P.currentProfile.UseRotationSolver,
-                        "Uses Rotation Solver's next positional when it has one. Otherwise Avarice uses your combo.");
+                        wrath
+                            ? "Uses Rotation Solver when Wrath is unused or has no hint. Otherwise your combo."
+                            : "Uses Rotation Solver when it has a next positional. Otherwise your combo.");
                 }
             }
 
@@ -113,14 +117,20 @@ internal static class TabSettings
 
             if (ImGui.CollapsingHeader("Job options"))
             {
+                ImGuiEx.Text(Ui.Muted, "These apply when Avarice is reading your combo, not Wrath or Rotation Solver.");
                 ImGuiEx.Text("Ninja");
-                ImGui.Checkbox("Show rear when Trick Attack is off cooldown", ref P.currentProfile.TrickAttack);
-                ImGui.Checkbox("Show both valid positionals based on Kazematoi charges", ref P.currentProfile.Kazematoi);
+                Ui.CheckboxHelp("Show rear when Trick Attack is ready", ref P.currentProfile.TrickAttack,
+                    "When Trick Attack or Kunai's Bane is off cooldown, show rear.");
+                Ui.CheckboxHelp("Show both positionals from Kazematoi", ref P.currentProfile.Kazematoi,
+                    "With 1–3 Kazematoi charges, show rear and flank.");
                 ImGuiEx.Text("Samurai");
-                ImGui.Checkbox("Disable anticipation while under Meikyo Shisui", ref P.currentProfile.Meikyo);
+                Ui.CheckboxHelp("Hide during Meikyo Shisui", ref P.currentProfile.Meikyo,
+                    "Hides the pie while Meikyo Shisui is active.");
                 ImGuiEx.Text("Reaper");
                 ImGui.SameLine();
                 ImGuiEx.Text("Anticipate first:");
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker("Which positional to show when both Gibbet and Gallows are available.");
                 ImGui.SameLine();
                 ImGui.RadioButton("Rear", ref P.currentProfile.Reaper, 0);
                 ImGui.SameLine();

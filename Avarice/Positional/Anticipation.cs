@@ -201,8 +201,13 @@ internal static unsafe class Anticipation
 		return AnticipatedSegments.None;
 	}
 
-	private static bool Learned(ActionID id) =>
-		Svc.Objects.LocalPlayer.Level >= ActionWatching.GetLevel((uint)id);
+	private static bool Learned(ActionID id)
+	{
+		var action = Svc.Data.GetExcelSheet<Lumina.Excel.Sheets.Action>()?.GetRowOrDefault((uint)id);
+		return action != null &&
+		       action.Value.ClassJobCategory.ValueNullable != null &&
+		       Svc.Objects.LocalPlayer.Level >= action.Value.ClassJobLevel;
+	}
 
 	private static bool Has(uint statusId) =>
 		Player.Status.Any(x => x.StatusId == statusId);
