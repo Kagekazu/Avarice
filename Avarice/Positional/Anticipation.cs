@@ -58,14 +58,29 @@ internal static class Anticipation
 		internal const uint Executioner = 3858;
 	}
 
+	private static string lastResolveKey = "";
+
 	internal static AnticipationHint Resolve(IBattleNpc target)
 	{
 		AnticipationHint hint;
 		if (TryWrath(target, out hint))
-			return hint;
+			return LogResolve(hint);
 		if (TryRotationSolver(out hint))
+			return LogResolve(hint);
+		return LogResolve(FromCombo());
+	}
+
+	private static AnticipationHint LogResolve(AnticipationHint hint)
+	{
+		var key = $"{hint.Source}|{hint.Segments}|{string.Join(",", hint.Actions)}";
+		if (key == lastResolveKey)
 			return hint;
-		return FromCombo();
+		lastResolveKey = key;
+		var message = $"[Anticipate] source={hint.Source} segments={hint.Segments} actions=[{string.Join(",", hint.Actions)}]";
+		PluginLog.Debug(message);
+		if (P.currentProfile?.Debug == true)
+			PluginLog.Information(message);
+		return hint;
 	}
 
 	private static bool TryWrath(IBattleNpc target, out AnticipationHint hint)

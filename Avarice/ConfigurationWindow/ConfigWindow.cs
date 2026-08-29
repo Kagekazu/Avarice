@@ -189,6 +189,18 @@ internal unsafe partial class ConfigWindow : Window
             P.positionalDebugWindow.IsOpen = true;
         }
 
+        ImGui.Separator();
+        ImGuiEx.Text(ImGuiColors.DalamudYellow, "Wrath positional hint:");
+        ImGuiEx.Text($"Installed: {P.WrathComboWatcher.PluginInstalled}");
+        ImGuiEx.Text($"Use Wrath: {P.currentProfile.UseWrathCombo}");
+        ImGuiEx.Text($"IPC available: {P.WrathComboWatcher.Available}");
+        if (!string.IsNullOrEmpty(P.WrathComboWatcher.LastError))
+            ImGuiEx.Text(ImGuiColors.DalamudRed, $"IPC error: {P.WrathComboWatcher.LastError}");
+        ImGuiEx.Text($"Wire: [{P.WrathComboWatcher.LastWire}]");
+        var wrathHint = P.WrathComboWatcher.CurrentHint;
+        ImGuiEx.Text($"Hint: dir={wrathHint.Direction} action={wrathHint.ActionId} gcds={wrathHint.GcdsUntil} target={wrathHint.TargetObjectId} satisfied={wrathHint.IsSatisfied}");
+        ImGui.Separator();
+
         if(ImGui.CollapsingHeader("StaticAutoDetectRadiusData"))
         {
             ImGuiEx.Text(P.StaticAutoDetectRadiusData.Select(x => x.ToString()).Join("\n"));

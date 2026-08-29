@@ -15,6 +15,8 @@ internal sealed class WrathComboWatcher : IDisposable
 
     private WrathComboPositionalHint currentHint = WrathComboPositionalHint.Empty;
     private long nextPollTick;
+    private string lastLogKey = "";
+    private string lastReject = "";
 
     internal WrathComboWatcher()
     {
@@ -24,16 +26,23 @@ internal sealed class WrathComboWatcher : IDisposable
         try
         {
             hintChangedSubscriber.Subscribe(OnHintChanged);
+            Log($"Subscribed to {HintChangedGate}. Wrath installed={PluginInstalled}");
         }
         catch (Exception ex)
         {
+            LastError = ex.Message;
             PluginLog.Debug($"Unable to subscribe to WrathCombo positional hints: {ex.Message}");
+            Log($"Subscribe failed: {ex.Message}");
         }
 
         Refresh();
     }
 
     internal bool Available { get; private set; }
+
+    internal string LastError { get; private set; } = "";
+
+    internal string LastWire { get; private set; } = "";
 
     internal bool PluginInstalled =>
         Svc.PluginInterface.InstalledPlugins.Any(p =>
@@ -46,7 +55,10 @@ internal sealed class WrathComboWatcher : IDisposable
         var now = Environment.TickCount64;
 
         if (currentHint.IsExpired(now))
+        {
             currentHint = WrathComboPositionalHint.Empty;
+            LogChange("hint expired");
+        }
 
         if (now < nextPollTick)
             return;
@@ -58,14 +70,35 @@ internal sealed class WrathComboWatcher : IDisposable
     internal bool TryGetHintForTarget(IBattleNpc target, out WrathComboPositionalDirection direction)
     {
         direction = WrathComboPositionalDirection.None;
+        var now = Environment.TickCount64;
 
-        if (!currentHint.IsActive(Environment.TickCount64) ||
-            currentHint.IsSatisfied ||
-            currentHint.TargetObjectId != target.GameObjectId)
+        if (!currentHint.IsActive(now))
+        {
+            RememberReject(Available ? "hint inactive or empty" : "Wrath IPC not available");
             return false;
+        }
+
+        if (currentHint.IsSatisfied)
+        {
+            RememberReject($"satisfied (already on {currentHint.Direction})");
+            return false;
+        }
+
+        if (currentHint.TargetObjectId != target.GameObjectId)
+        {
+            RememberReject($"target mismatch hint={currentHint.TargetObjectId} current={target.GameObjectId}");
+            return false;
+        }
 
         direction = currentHint.Direction;
-        return direction is WrathComboPositionalDirection.Rear or WrathComboPositionalDirection.Flank;
+        if (direction is WrathComboPositionalDirection.Rear or WrathComboPositionalDirection.Flank)
+        {
+            RememberReject("");
+            return true;
+        }
+
+        RememberReject($"direction {direction} is not rear/flank");
+        return false;
     }
 
     public void Dispose()
@@ -91,16 +124,60 @@ internal sealed class WrathComboWatcher : IDisposable
         {
             var wire = getHintSubscriber.InvokeFunc();
             Available = true;
+            LastError = "";
+            LastWire = FormatWire(wire);
 
             currentHint = TryParse(wire, out var hint)
                 ? hint
                 : WrathComboPositionalHint.Empty;
+
+            if (wire is null)
+                LogChange("IPC returned null (no hint)");
+            else if (currentHint.Direction is WrathComboPositionalDirection.None)
+                LogChange($"IPC wire ignored: {LastWire}");
+            else
+                LogChange("IPC hint");
         }
-        catch
+        catch (Exception ex)
         {
             Available = false;
+            LastError = ex.Message;
+            LastWire = "";
             currentHint = WrathComboPositionalHint.Empty;
+            LogChange($"IPC invoke failed: {ex.Message}");
         }
+    }
+
+    private static string FormatWire(uint[] wire)
+    {
+        if (wire is null)
+            return "null";
+        return wire.Length == 0 ? "[]" : string.Join(",", wire);
+    }
+
+    private void RememberReject(string reason)
+    {
+        if (reason == lastReject)
+            return;
+        lastReject = reason;
+        if (reason.Length > 0)
+            Log($"Hint not used: {reason}");
+    }
+
+    private void LogChange(string reason)
+    {
+        var key = $"{Available}|{LastError}|{currentHint.Direction}|{currentHint.ActionId}|{currentHint.GcdsUntil}|{currentHint.TargetObjectId}|{currentHint.IsSatisfied}|{LastWire}";
+        if (key == lastLogKey)
+            return;
+        lastLogKey = key;
+        Log($"{reason}: installed={PluginInstalled} available={Available} dir={currentHint.Direction} action={currentHint.ActionId} gcds={currentHint.GcdsUntil} target={currentHint.TargetObjectId} satisfied={currentHint.IsSatisfied} wire=[{LastWire}]");
+    }
+
+    private static void Log(string message)
+    {
+        PluginLog.Debug($"[WrathHint] {message}");
+        if (P.currentProfile?.Debug == true)
+            PluginLog.Information($"[WrathHint] {message}");
     }
 
     private static bool TryParse(uint[] wire, out WrathComboPositionalHint hint)
