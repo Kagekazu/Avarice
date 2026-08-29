@@ -203,7 +203,10 @@ internal static class TabSettings
         var segments = hint.Segments == AnticipatedSegments.Both
             ? "Rear+Flank"
             : hint.Segments.HasFlag(AnticipatedSegments.Rear) ? "Rear" : "Flank";
-        Ui.StatusLine($"{source} · {segments}", true);
+        var text = $"{source} · {segments}";
+        if (P.currentProfile.Debug && hint.Actions.Length > 0)
+            text += $" ({string.Join(",", hint.Actions)})";
+        Ui.StatusLine(text, true);
     }
 
     private static void DrawPlayer()
