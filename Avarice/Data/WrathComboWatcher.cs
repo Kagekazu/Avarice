@@ -9,6 +9,7 @@ internal sealed class WrathComboWatcher : IDisposable
     private const string HintChangedGate = "OnUpcomingPositionalHint";
     private const int HintFieldCount = 7;
     private const int PollIntervalMs = 1000;
+    private const int FailedPollIntervalMs = 2500;
 
     private readonly ICallGateSubscriber<uint[]> getHintSubscriber;
     private readonly ICallGateSubscriber<object> hintChangedSubscriber;
@@ -63,7 +64,7 @@ internal sealed class WrathComboWatcher : IDisposable
         if (now < nextPollTick)
             return;
 
-        nextPollTick = now + PollIntervalMs;
+        nextPollTick = now + (Available ? PollIntervalMs : FailedPollIntervalMs);
         Refresh();
     }
 
@@ -78,13 +79,7 @@ internal sealed class WrathComboWatcher : IDisposable
             return false;
         }
 
-        if (currentHint.IsSatisfied)
-        {
-            RememberReject($"satisfied (already on {currentHint.Direction})");
-            return false;
-        }
-
-        if (currentHint.TargetObjectId != target.GameObjectId)
+        if ((uint)currentHint.TargetObjectId != (uint)target.GameObjectId)
         {
             RememberReject($"target mismatch hint={currentHint.TargetObjectId} current={target.GameObjectId}");
             return false;

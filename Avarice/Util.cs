@@ -1,4 +1,6 @@
 using Avarice.Data;
+using System.Threading;
+using System.Threading.Tasks;
 using Avarice.StaticData;
 using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.JobGauge.Types;
@@ -10,7 +12,7 @@ using System.IO;
 
 namespace Avarice;
 
-internal static unsafe class Util
+internal static class Util
 {
 	internal static Vector4 GetParsedColor(int percent)
 	{
@@ -106,11 +108,17 @@ internal static unsafe class Util
 
 	internal static HashSet<uint> LoadStaticAutoDetectRadiusData()
 	{
+		return LoadStaticAutoDetectRadiusDataAsync(CancellationToken.None).GetAwaiter().GetResult();
+	}
+
+	internal static async Task<HashSet<uint>> LoadStaticAutoDetectRadiusDataAsync(CancellationToken cancellationToken)
+	{
 		HashSet<uint> ret = new();
 		try
 		{
 			string path = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName, "res", "AutoDetectTankRadius.csv");
-			foreach (string x in File.ReadAllText(path).Split("\n", StringSplitOptions.TrimEntries))
+			var text = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
+			foreach (string x in text.Split("\n", StringSplitOptions.TrimEntries))
 			{
 				if (x != "" && uint.TryParse(x, out uint res))
 				{

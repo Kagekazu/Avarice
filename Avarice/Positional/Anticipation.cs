@@ -4,6 +4,7 @@ using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.JobGauge.Types;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace Avarice.Positional;
 
@@ -35,7 +36,7 @@ internal readonly struct AnticipationHint
 /// <summary>
 /// Wrath / RSR / combo all resolve to action IDs, then <see cref="Data.ActionPositional"/>.
 /// </summary>
-internal static class Anticipation
+internal static unsafe class Anticipation
 {
 	private static class Status
 	{
@@ -59,15 +60,24 @@ internal static class Anticipation
 	}
 
 	private static string lastResolveKey = "";
+	private static uint lastResolveFrame;
+	private static ulong lastResolveTarget;
+	private static AnticipationHint lastResolveHint = AnticipationHint.Empty;
 
 	internal static AnticipationHint Resolve(IBattleNpc target)
 	{
+		var frame = Framework.Instance()->FrameCounter;
+		if (frame == lastResolveFrame && target.GameObjectId == lastResolveTarget)
+			return lastResolveHint;
+
 		AnticipationHint hint;
-		if (TryWrath(target, out hint))
-			return LogResolve(hint);
-		if (TryRotationSolver(out hint))
-			return LogResolve(hint);
-		return LogResolve(FromCombo());
+		if (!TryWrath(target, out hint) && !TryRotationSolver(out hint))
+			hint = FromCombo();
+
+		lastResolveFrame = frame;
+		lastResolveTarget = target.GameObjectId;
+		lastResolveHint = hint;
+		return LogResolve(hint);
 	}
 
 	private static AnticipationHint LogResolve(AnticipationHint hint)
