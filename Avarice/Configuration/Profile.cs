@@ -130,4 +130,5 @@ public class Profile
     public bool EnableDutyMiddle = false;
 
     public bool UseRotationSolver = false;
+    public bool UseWrathCombo = true;
 }

@@ -7,8 +7,12 @@ public enum ActionID : uint
 	#region DRG
 
 	//Setup skills
+	TrueThrust = 75,
+	VorpalThrust = 78,
 	FullThrust = 84,
 	Disembowel = 87,
+	RaidenThrust = 16479,
+	LanceBarrage = 36954,
 	HeavensThrust = 25771,
 	SpiralBlow = 36955,
 
@@ -38,6 +42,7 @@ public enum ActionID : uint
 	#region NIN
 
 	//Setup skills
+	SpinningEdge = 2240,
 	GustSlash = 2242,
 	TrickAttackDebuff = 3254,
 	KunaisBaneDebuff = 3906,

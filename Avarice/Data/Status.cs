@@ -62,7 +62,7 @@ namespace Avarice.Data
 			return FindEffect(effectID, Svc.Targets.Target, null);
 		}
 
-		public static StatusInfo? FindEffect(ushort effectID, IGameObject? obj, ulong? sourceID)
+		public static StatusInfo? FindEffect(ushort effectID, IGameObject obj, ulong? sourceID)
 		{
 			return ComboCache.ComboCacheInstance.GetStatus(effectID, obj, sourceID);
 		}

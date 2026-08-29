@@ -11,6 +11,7 @@ internal unsafe class Memory
 {
     public delegate* unmanaged<void*, uint, GameObjectId, void> ShowLockonIcon = (delegate* unmanaged<void*, uint, GameObjectId, void>)Svc.SigScanner.ScanText("85 D2 0F 84 ?? ?? ?? ?? 48 89 6C 24 ?? 57 48 83 EC 30");
     internal uint LastComboMove => ActionManager.Instance()->Combo.Action;
+    internal float ComboTimer => ActionManager.Instance()->Combo.Timer;
 
     internal Memory()
     {

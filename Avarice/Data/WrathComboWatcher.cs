@@ -35,6 +35,12 @@ internal sealed class WrathComboWatcher : IDisposable
 
     internal bool Available { get; private set; }
 
+    internal bool PluginInstalled =>
+        Svc.PluginInterface.InstalledPlugins.Any(p =>
+            p.InternalName.Equals("WrathCombo", StringComparison.OrdinalIgnoreCase));
+
+    internal WrathComboPositionalHint CurrentHint => currentHint;
+
     internal void Tick()
     {
         var now = Environment.TickCount64;

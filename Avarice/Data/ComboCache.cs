@@ -37,7 +37,7 @@ namespace Avarice.Data
 			return (T)gauge;
 		}
 
-		internal StatusInfo? GetStatus(uint statusID, IGameObject? obj, ulong? sourceID)
+		internal StatusInfo? GetStatus(uint statusID, IGameObject obj, ulong? sourceID)
 		{
 			(uint statusID, ulong? GameObjectId, ulong? sourceID) key = (statusID, obj?.GameObjectId, sourceID);
 			if (statusCache.TryGetValue(key, out StatusInfo? found))

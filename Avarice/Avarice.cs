@@ -34,7 +34,7 @@ public unsafe class Avarice : IDalamudPlugin
     internal PositionalDebugWindow positionalDebugWindow;
     internal Memory memory;
 
-    internal static uint[] PositionalJobs = new uint[] { 2, 4, 29, 30, 20, 34, 39, 22 };
+    internal static uint[] PositionalJobs = new uint[] { 2, 4, 29, 30, 20, 34, 39, 22, 41 };
     internal uint Job = 0;
     internal HashSet<uint> StaticAutoDetectRadiusData;
     internal PositionalManager PositionalManager;
@@ -70,7 +70,8 @@ public unsafe class Avarice : IDalamudPlugin
             positionalDebugWindow = new();
             windowSystem.AddWindow(positionalDebugWindow);
             Svc.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
-            Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { configWindow.IsOpen = true; };
+            Svc.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigWindow;
+            Svc.PluginInterface.UiBuilder.OpenMainUi += OpenConfigWindow;
             Svc.Condition.ConditionChange += OnConditionChange;
             _ = Svc.Commands.AddHandler("/avarice", new CommandInfo((string cmd, string args) =>
             {
@@ -199,6 +200,11 @@ public unsafe class Avarice : IDalamudPlugin
         }
     }
 
+    private void OpenConfigWindow()
+    {
+        configWindow.IsOpen = true;
+    }
+
     internal Profile GetProfileForJob(uint job)
     {
         if (P.config.JobProfiles.TryGetValue(job, out var guid))
@@ -216,6 +222,8 @@ public unsafe class Avarice : IDalamudPlugin
         Safe(() => Svc.PluginInterface.SavePluginConfig(config));
         //Svc.GameNetwork.NetworkMessage -= OnNetworkMessage;
         Svc.PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
+        Svc.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigWindow;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= OpenConfigWindow;
         _ = Svc.Commands.RemoveHandler("/avarice");
         Svc.Condition.ConditionChange -= OnConditionChange;
         Svc.Framework.Update -= Tick;
