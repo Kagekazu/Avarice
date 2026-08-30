@@ -76,8 +76,9 @@ internal unsafe class Memory
                         Detail = string.Join("\n", detailParts),
                     });
                 }
-
-                PluginLog.Debug($"Positional state: {positionalState}");
+                
+                if (positionalState != PositionalState.Ignore)
+                    PluginLog.Debug($"Positional state: {positionalState}");
             }
         }
         catch(Exception e)
